@@ -7,6 +7,15 @@ export default class Define {
 		}
 	};
 
+	static get DRAG_TARGET(){
+		return {
+			NONE  : 0,
+			BODY  : 1,
+			RIGHT : 2,
+			LEFT  : 3,
+		}
+	};
+
 	constructor() {
 	}
 }

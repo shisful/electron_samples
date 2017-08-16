@@ -1,4 +1,6 @@
 'use strict';
+import Define from './../class/Define.js'
+
 import jQuery from 'jquery'
 window.$ = window.jQuery = jQuery;
 import React from 'react'
@@ -29,18 +31,18 @@ class SampleView extends React.Component {
 				contentsDatas.push( { time: i ,name:i, width:2 } );
 			}
 		}
-		this.state = { scrollTop : 0 ,scrollLeft : 0, contentsDatas : contentsDatas};
+		this.state = {
+		 scrollTop     : 0 ,
+		 scrollLeft    : 0,
+		 contentsDatas : contentsDatas,
+		 itemDragState : Define.DRAG_TARGET.NONE,
+		};
 
 		this.onScroll = this.onScroll.bind(this);
-		this.onBodyDrag = this.onBodyDrag.bind(this);
-		this.onBodyDragStart = this.onBodyDragStart.bind(this);
-		this.onBodyDragStop = this.onBodyDragStop.bind(this);
-		this.onRightDrag = this.onRightDrag.bind(this);
-		this.onRightDragStart = this.onRightDragStart.bind(this);
-		this.onRightDragStop = this.onRightDragStop.bind(this);
-		this.onLeftDrag = this.onLeftDrag.bind(this);
-		this.onLeftDragStart = this.onLeftDragStart.bind(this);
-		this.onLeftDragStop = this.onLeftDragStop.bind(this);
+
+		this.onDragStart = this.onDragStart.bind(this);
+		this.onDragStop  = this.onDragStop.bind(this);
+		this.onDrag      = this.onDrag.bind(this);
 
 		this.beforeMouseX = 0;
 	}
@@ -52,83 +54,63 @@ class SampleView extends React.Component {
 	}
 
 	onScroll(left,top){
-		this.setState({scrollTop : top ,scrollLeft : left});
+			this.setState({scrollTop : top ,scrollLeft : left});
 	}
 
-	onBodyDragStart(e,index){
+	onDragStart( target, index, e ){
 		this.beforeMouseX = e.clientX;
+		this.setState( { itemDragTarget : target } );
 	}
 
-	onBodyDrag(e,index){
-	}
+	onDragStop( target, index, e ){
+		var beforeTime = this.state.contentsDatas[index].time;
+		var beforeWidth = this.state.contentsDatas[index].width;
 
-
-	onBodyDragStop(e,index){
 		var deltaX = e.clientX - this.beforeMouseX;
 		this.beforeMouseX = e.clientX;
-
-		this.state.contentsDatas[index].time += deltaX/50;
-		if(this.state.contentsDatas[index].time < 0){
-			this.state.contentsDatas[index].time = 0;
-		}
-		this.setState(
-			{
-				contentsDatas : this.state.contentsDatas
-			}
-		);
-	}
-
-	onRightDragStart(e,index){
-		this.beforeMouseX = e.clientX;
-	}
-
-	onRightDrag(e,index){
-//		this.onRightDragStop(e,index);
-	}
-
-	onRightDragStop(e,index){
-		var deltaX = e.clientX - this.beforeMouseX;
-		this.beforeMouseX = e.clientX;
-		this.state.contentsDatas[index].width += deltaX/50;
-		if(this.state.contentsDatas[index].width < 0){
-			this.state.contentsDatas[index].width = 0;
-		}
-		this.setState(
-			{
-				contentsDatas : this.state.contentsDatas
-			}
-		);
-	}
-
-	onLeftDragStart(e,index){
-		this.beforeMouseX = e.clientX;
-	}
-
-	onLeftDrag(e,index){
-//		this.onLeftDragStop(e,index);
-	}
-
-	onLeftDragStop(e,index){
-		var deltaX = e.clientX - this.beforeMouseX;
-		this.beforeMouseX = e.clientX;
-
 		{
-			var beforeWidth = this.state.contentsDatas[index].width;
-			var newWidth = beforeWidth - deltaX/50;
-			if( newWidth < 0){
-				newWidth = 0;
+			switch(target){
+				case Define.DRAG_TARGET.BODY :
+				{
+					this.state.contentsDatas[index].time += deltaX/50;
+					if(this.state.contentsDatas[index].time < 0){
+						this.state.contentsDatas[index].time = 0;
+					}
+				}
+				break;
+				case Define.DRAG_TARGET.RIGHT :
+				{
+					this.state.contentsDatas[index].width += deltaX/50;
+					if(this.state.contentsDatas[index].width < 0){
+						this.state.contentsDatas[index].width = 0;
+					}
+				}
+				break;
+				case Define.DRAG_TARGET.LEFT :
+				{
+					this.state.contentsDatas[index].width -= deltaX/50;
+					if(this.state.contentsDatas[index].width < 0){
+						this.state.contentsDatas[index].width = 0;
+					}
+					this.state.contentsDatas[index].time  = beforeTime + (beforeWidth - this.state.contentsDatas[index].width);
+					if( this.state.contentsDatas[index].time < 0 ){
+						this.state.contentsDatas[index].time = 0;
+						this.state.contentsDatas[index].width = beforeWidth + beforeTime - this.state.contentsDatas[index].time;
+					}
+				}
+				break;
 			}
-			var beforeTime = this.state.contentsDatas[index].time;
-			var newTime = beforeTime + (beforeWidth - newWidth);
-
-			this.state.contentsDatas[index].width = newWidth;
-			this.state.contentsDatas[index].time  = newTime;
 		}
+
 		this.setState(
 			{
-				contentsDatas : this.state.contentsDatas
+				contentsDatas : this.state.contentsDatas,
+				itemDragState : Define.DRAG_TARGET.NONE
 			}
 		);
+	}
+
+	onDrag( target, index, e ){
 	}
 
 	render() {
@@ -215,9 +197,9 @@ const BodyContents = ({that,datas}) => {
 									axis="x"
 									defaultPosition={{x:data.time * 50,y:data.name * 50}}
 									position={{x:data.time * 50,y:data.name * 50}}
-									onStart={that.onBodyDragStart}
-									onDrag={(e) => {that.onBodyDrag(e,index)}}
-									onStop={(e) => {that.onBodyDragStop(e,index)}}
+									onStart={(e) => {that.onDragStart(Define.DRAG_TARGET.BODY,index,e)}}
+									onStop={(e) => {that.onDragStop(Define.DRAG_TARGET.BODY,index,e)}}
+									onDrag={(e) => {that.onDrag(Define.DRAG_TARGET.BODY,index,e)}}
 									handle=".contents-item-body"
 								>
 									<div
@@ -246,9 +228,9 @@ const BodyContents = ({that,datas}) => {
 
 										defaultPosition={{x:data.time * 50, y : data.name * 50}}
 										position={{x:data.time * 50, y : data.name * 50}}
-										onStart={(e) => {that.onLeftDragStart(e,index)}}
-										onDrag={(e) => {that.onLeftDrag(e,index)}}
-										onStop={(e) => {that.onLeftDragStop(e,index)}}
+										onStart={(e) => {that.onDragStart(Define.DRAG_TARGET.LEFT,index,e)}}
+										onDrag={(e) => {that.onDrag(Define.DRAG_TARGET.LEFT,index,e)}}
+										onStop={(e) => {that.onDragStop(Define.DRAG_TARGET.LEFT,index,e)}}
 						 			>
 							 		 	<div
 							 				className="contents-item-left-bar"
@@ -270,9 +252,9 @@ const BodyContents = ({that,datas}) => {
 
 										defaultPosition={{x:data.time * 50 + data.width * 50 - 7, y : data.name * 50}}
 										position={{x:data.time * 50 + data.width * 50 - 7, y : data.name * 50}}
-										onStart={(e) => {that.onRightDragStart(e,index)}}
-										onDrag={(e) => {that.onRightDrag(e,index)}}
-										onStop={(e) => {that.onRightDragStop(e,index)}}
+										onStart={(e) => {that.onDragStart(Define.DRAG_TARGET.RIGHT,index,e)}}
+										onStop={(e) => {that.onDragStop(Define.DRAG_TARGET.RIGHT,index,e)}}
+										onDrag={(e) => {that.onDrag(Define.DRAG_TARGET.RIGHT,index,e)}}
 
 									>
 										<div

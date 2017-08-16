@@ -36,6 +36,10 @@ $scale-horizon-height:50px;
       height:$contents-height;
       z-index : 42;
 
+      .hidden {
+          display:none;
+      }
+
       .contents-item-left-bar {
         position:absolute;
         width : 7px;
