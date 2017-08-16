@@ -1,0 +1,182 @@
+
+$contents-width:2000px;
+$contents-height:2000px;
+$sidebar-width:50px;
+$header-height:50px;
+
+$scale-vertical-width:50px;
+$scale-horizon-height:50px;
+
+#sample-view-body {
+  display : block;
+  background-color: black;
+  width  : 100%;
+  height : 100%;
+  padding: 10px;
+
+  .scrollable-contents-area {
+    display : block;
+    width  : 100%;
+    height : 100%;
+    overflow: hidden;
+    background-color: blue;
+  }
+  .scrollable-contents-body {
+    display : block;
+    background-color: skyblue;
+    overflow: scroll;
+    width : 100%;
+    height: 100%;
+
+    .contents-items {
+      position:absolute;
+      top:0px;
+      left:0px;
+      width:$contents-width;
+      height:$contents-height;
+      z-index : 42;
+
+      .contents-item-left-bar {
+        position:absolute;
+        width : 7px;
+        height : $header-height;
+        cursor : ew-resize;
+        z-index : 45;
+        border-left: 1px solid darkblue;
+      }
+
+      .contents-item-body {
+        position:absolute;
+        height : $header-height;
+        width : 100%;
+        background-color: skyblue;
+        cursor : move;
+        z-index : 43;
+        border-bottom: 1px solid #bbb;
+      }
+      .contents-item-right-bar {
+        position:absolute;
+        height : $header-height;
+        width : 7px;
+        cursor : ew-resize;
+        z-index : 45;
+        border-right: 1px solid darkblue;
+      }
+    }
+  }
+
+  .scrollable-contents-top-left {
+    display : block;
+    position: absolute;
+    top:0px;
+    left:0px;
+    width : $sidebar-width;
+    height : $header-height;
+    background: linear-gradient(90deg, rgba(255,255,255,1), rgba(255,255,255,0));
+    z-index: 100;
+  }
+
+  .scrollable-contents-header {
+    position: absolute;
+    top:0px;
+    left:0px;
+    display : block;
+    background-color:  rgb(252,252,252);
+    width : $contents-height + $sidebar-width;
+    height : $header-height;
+    z-index: 51;
+    padding-left : $sidebar-width;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+  }
+  .scrollable-contents-sidebar {
+    position: absolute;
+    top:0px;
+    left:0px;
+    display : block;
+    background-color: rgba(240,240,240,0);
+    height : $contents-height + $header-height;
+    width  : $sidebar-width;
+    z-index: 50;
+    padding-top : $header-height;
+
+    border-right-style: solid;
+    border-right-width: 1px;
+  }
+
+  .scrollable-contents {
+    position:absolute;
+    top:$header-height;
+    left:$sidebar-width;
+    display : block;
+    background-color: white;
+    width : $contents-width;
+    height: $contents-height;
+    z-index: 40;
+  }
+
+  .scale-vertical {
+    padding : 0px;
+    li{
+      display:inline-block;
+      width : $scale-vertical-width;
+      border-right: 1px solid #bbb;
+    }
+  }
+
+  .scale-horizon {
+    padding : 0px;
+    li{
+      display:block;
+      height : $scale-horizon-height;
+      border-bottom: 1px solid #bbb;
+    }
+    li:nth-child(odd) {
+      background-color: rgb(255,255,255);
+    }
+    li:nth-child(even) {
+      background-color: rgb(230,230,230);
+    }
+  }
+
+  .scale-header {
+    @extend .scale-vertical;
+    position : absolute;
+    left : $sidebar-width/2;
+    li{
+      height : $header-height;
+      border-right-style: none;
+      text-align: center;
+      background-color: rgb(252,252,252);
+    }
+  }
+
+  .scale-sidebar {
+    @extend .scale-horizon;
+    li{
+      width : $sidebar-width;
+    }
+  }
+
+  .scale-contents-vertical {
+    @extend .scale-vertical;
+    position : absolute;
+    top : 0px;
+    left : 0px;
+    li{
+      height : $contents-height;
+    }
+    z-index: 41;
+  }
+
+  .scale-contents-horizon {
+    @extend .scale-horizon;
+    position : absolute;
+    top : 0px;
+    left : 0px;
+    li{
+      width : $contents-width;
+    }
+    z-index: 40;
+  }
+}
