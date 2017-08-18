@@ -178,6 +178,8 @@ const SampleViewBody = ({that}) => {
 							<ContentsItems that={that} datas={that.state.contentsDatas}/>
 						</div>
 					</div>
+					<Button bsStyle="warning" className="button0" onClick={(e) => {that.setState({ horizontalScaleWidth : that.state.horizontalScaleWidth/2 })}} >-</Button>
+					<Button bsStyle="primary" className="button1" onClick={(e) => {that.setState({ horizontalScaleWidth : that.state.horizontalScaleWidth*2 })}} >+</Button>
 				</div>
 			</div>
 	)

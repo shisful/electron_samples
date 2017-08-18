@@ -127,6 +127,7 @@ $contents-item-height:39px;
     li{
       display:inline-block;
       border-right: 1px solid #ccc;
+      width : 1px;
     }
   }
 
@@ -190,5 +191,22 @@ $contents-item-height:39px;
       width : $contents-width;
     }
     z-index: 40;
+  }
+
+  .button0 {
+    position : absolute;
+    top : 0px;
+    left :0px;
+    width:30px;
+    height:30px;
+    z-index : 1000;
+  }
+  .button1 {
+    position : absolute;
+    top : 0px;
+    left :40px;
+    width:30px;
+    height:30px;
+    z-index : 1000;
   }
 }
