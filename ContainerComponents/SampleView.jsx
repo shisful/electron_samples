@@ -32,14 +32,10 @@ class SampleView extends React.Component {
 			}
 		}
 		this.state = {
-		 scrollTop     : 0 ,
-		 scrollLeft    : 0,
 		 contentsDatas : contentsDatas,
-		 itemDragState : Define.DRAG_TARGET.NONE,
+		 draggingTarget : Define.DRAG_TARGET.NONE,
 		 horizontalScaleWidth : Define.SCALE_HORIZONTAL_WIDTH,
 		};
-
-		this.onScroll = this.onScroll.bind(this);
 
 		this.onDragStart = this.onDragStart.bind(this);
 		this.onDragStop  = this.onDragStop.bind(this);
@@ -54,13 +50,9 @@ class SampleView extends React.Component {
 	componentDidMount(){
 	}
 
-	onScroll(left,top){
-		this.setState({scrollTop : top ,scrollLeft : left});
-	}
-
 	onDragStart( target, index, e ){
 		this.beforeMouseX = e.clientX;
-		this.setState( { itemDragTarget : target } );
+		this.setState( { draggingTarget : target } );
 	}
 
 	onDragStop( target, index, e ){
@@ -105,15 +97,15 @@ class SampleView extends React.Component {
 
 		this.setState(
 			{
-				contentsDatas : this.state.contentsDatas,
-				itemDragState : Define.DRAG_TARGET.NONE
+				contentsDatas  : this.state.contentsDatas,
+				draggingTarget : Define.DRAG_TARGET.NONE
 			}
 		);
 	}
 
 	onDrag( target, index, e ){
 		/* ドラッグが重かったらここを消す */
-		this.onDragStop(target, index, e);
+//		this.onDragStop(target, index, e);
 	}
 
 	render() {
@@ -169,27 +161,17 @@ const SampleViewBody = ({that}) => {
 			<div id='sample-view-body'>
 				<div className='scrollable-contents-area'>
 					<div className='scrollable-contents-top-left' />
-					<div
-					 	className='scrollable-contents-header'
-					  style={
-							{
-								transform: "translateX(" + -that.state.scrollLeft + "px)"
-							}
-						}
-					>
-						<HeaderScale that={that} />
-					</div>
-					<div
-						className='scrollable-contents-sidebar'
-						style={
-							{
-								transform: "translateY(" + -that.state.scrollTop + "px)"
-							}
-						}
-					>
-						<SidebarScale that={that} />
-					</div>
-					<div className='scrollable-contents-body' onScroll={(event)=>{that.onScroll(event.target.scrollLeft,event.target.scrollTop);}}>
+					<div className='scrollable-contents-body'>
+						<div
+							className='scrollable-contents-header'
+						>
+							<HeaderScale that={that} />
+						</div>
+						<div
+							className='scrollable-contents-sidebar'
+						>
+							<SidebarScale that={that} />
+						</div>
 						<div className='scrollable-contents'>
 							<ContentsVerticalScale that={that} />
 							<ContentsHorizontalScale that={that} />
@@ -202,8 +184,7 @@ const SampleViewBody = ({that}) => {
 }
 
 
-const ContentsItems = ({that,datas}) => {
-	return (
+const ContentsItems = ({that,datas}) => (
 		<div className="contents-items">
 			{
 				datas.map(
@@ -250,7 +231,7 @@ const ContentsItems = ({that,datas}) => {
 										onStop={(e) => {that.onDragStop(Define.DRAG_TARGET.LEFT,index,e)}}
 						 			>
 							 		 	<div
-							 				className="contents-item-left-bar"
+							 				className={"contents-item-left-bar "+( (that.state.draggingTarget === Define.DRAG_TARGET.BODY)? "hidden" : "" )}
 							 			>
 									 	</div>
 							 		</Draggable>
@@ -275,7 +256,7 @@ const ContentsItems = ({that,datas}) => {
 
 									>
 										<div
-											className="contents-item-right-bar"
+											className={"contents-item-right-bar "+( (that.state.draggingTarget === Define.DRAG_TARGET.BODY)? "hidden" : "" ) }
 										>
 										</div>
 									</Draggable>
@@ -284,8 +265,7 @@ const ContentsItems = ({that,datas}) => {
 					)
 			}
 		</div>
-	)
-}
+)
 
 const HeaderScale = ({that}) => {
 	return (

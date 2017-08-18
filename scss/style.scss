@@ -57,7 +57,6 @@ $contents-item-height:39px;
       .contents-item-body {
         position:absolute;
         height : $contents-item-height;
-        width : 100%;
         background-color: skyblue;
         cursor : move;
         z-index : 43;
@@ -86,9 +85,8 @@ $contents-item-height:39px;
   }
 
   .scrollable-contents-header {
-    position: absolute;
-    top:0px;
-    left:0px;
+    position: sticky;
+    top     : 0px;
     display : block;
     background-color:  rgb(252,252,252);
     width : $contents-height + $sidebar-width;
@@ -99,15 +97,13 @@ $contents-item-height:39px;
     border-bottom-width: 1px;
   }
   .scrollable-contents-sidebar {
-    position: absolute;
-    top:0px;
-    left:0px;
+    position: sticky;
+    left    :0px;
     display : block;
     background-color: rgba(240,240,240,0);
     height : $contents-height + $header-height;
     width  : $sidebar-width;
     z-index: 50;
-    padding-top : $header-height;
 
     border-right-style: solid;
     border-right-width: 1px;
