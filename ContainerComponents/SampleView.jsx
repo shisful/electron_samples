@@ -263,34 +263,6 @@ const ContentsItemRightBar = ({that, data, index}) => (
 );
 
 
-const HeaderScale = ({that}) => {
-	return (
-		<ul className="scale-header">
-	    {HeaderScales}
-	  </ul>
-	)
-}
-
-const HeaderScales = scaleDatas.map(
-	function(item,index){
-  	return <li key={`item-${index}`}>{item.text}</li>
-		}
-);
-
-const ContentsVerticalScale = ({that}) => {
-	return (
-		<ul className="scale-contents-vertical">
-	    {ContentsVerticalScales}
-	  </ul>
-	)
-}
-
-const ContentsVerticalScales = scaleDatas.map(
-	function(item,index){
-  	return <li key={`item-${index}`}></li>
-		}
-);
-
 const SidebarScale = ({that}) => {
 	return (
 		<ul className="scale-sidebar">
@@ -299,13 +271,6 @@ const SidebarScale = ({that}) => {
 	)
 }
 
-const ContentsHorizontalScale = ({that}) => {
-	return (
-		<ul className="scale-contents-horizon">
-	    {ContentsHorizontalScales}
-	  </ul>
-	)
-}
 
 const SidebarScales = scaleDatas.map(
 	function(item,index){
@@ -313,8 +278,45 @@ const SidebarScales = scaleDatas.map(
 	}
 );
 
-const ContentsHorizontalScales = scaleDatas.map(
-	function(item,index){
-  	return <li key={`item-${index}`}></li>
+const HeaderScale = ({that}) => {
+	var li = [];
+	{
+		for(var i = 0 ; i < scaleDatas.length ; i++){
+			li.push( <li key={`item-${i}`} style={{ width:that.state.horizontalScaleWidth }} >{scaleDatas[i].text}</li> );
 		}
-);
+	}
+	return (
+		<ul className="scale-header">
+			{li}
+	  </ul>
+	)
+}
+
+
+const ContentsHorizontalScale = ({that}) => {
+	var li = [];
+	{
+		for(var i = 0 ; i < scaleDatas.length ; i++){
+			li.push( <li key={`item-${i}`} ></li> );
+		}
+	}
+	return (
+		<ul className="scale-contents-horizon">
+			{li}
+	  </ul>
+	)
+}
+
+const ContentsVerticalScale = ({that}) => {
+	var li = [];
+	{
+		for(var i = 0 ; i < scaleDatas.length ; i++){
+			li.push( <li key={`item-${i}`} style={{ width:that.state.horizontalScaleWidth }} ></li> );
+		}
+	}
+	return (
+		<ul className="scale-contents-vertical">
+			{li}
+	  </ul>
+	)
+}
