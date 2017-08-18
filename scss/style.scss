@@ -126,7 +126,7 @@ $contents-item-height:39px;
     padding : 0px;
     li{
       display:inline-block;
-      border-right: 1px solid #bbb;
+      border-right: 1px solid #ccc;
     }
   }
 
@@ -135,13 +135,13 @@ $contents-item-height:39px;
     li{
       display:block;
       height : $scale-vertical-height;
-      border-bottom: 1px solid #bbb;
+      border-bottom: 1px solid #ccc;
     }
     li:nth-child(odd) {
-      background-color: rgb(255,255,255);
+      background-color: #fff;
     }
     li:nth-child(even) {
-      background-color: rgb(230,230,230);
+      background-color: rgb(250,250,250);
     }
   }
 
@@ -169,10 +169,16 @@ $contents-item-height:39px;
     position : absolute;
     top : 0px;
     left : 0px;
+    z-index: 41;
     li{
       height : $contents-height;
     }
-    z-index: 41;
+    li:nth-child(5n) {
+      border-right: 2px solid #ccc;
+    }
+    li:nth-child(10n) {
+      border-right: 2px solid #aaa;
+    }
   }
 
   .scale-contents-horizon {
