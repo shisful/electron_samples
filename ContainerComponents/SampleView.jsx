@@ -25,14 +25,25 @@ class SampleView extends React.Component {
 
 	constructor(props) {
 		super(props);
-		var contentsDatas = [];
+		var contentsDataMap = [];
 		{
+			var contentsDatas = [];
 			for( var i = 0 ; i < 10;i++){
-				contentsDatas.push( { time: i ,name:i, width:2 } );
+				contentsDatas.push( { key:i%5, data: "on" ,  time: i ,  width:2 } );
+				contentsDatas.push( { key:i%5, data: "off" , time: i+2, width:2 } );
+			}
+			{
+				for( var i = 0 ; i < contentsDatas.length ; i++ ){
+					var key = contentsDatas[i].key;
+					if( !contentsDataMap[ key ] ){
+						contentsDataMap[ key ] = [];
+					}
+					contentsDataMap[ key ].push( contentsDatas[i] );
+				}
 			}
 		}
 		this.state = {
-		 contentsDatas : contentsDatas,
+		 contentsDataMap : contentsDataMap,
 		 draggingTarget : Define.DRAG_TARGET.NONE,
 		 horizontalScaleWidth : Define.SCALE_HORIZONTAL_WIDTH,
 		};
@@ -40,6 +51,8 @@ class SampleView extends React.Component {
 		this.onDragStart = this.onDragStart.bind(this);
 		this.onDragStop  = this.onDragStop.bind(this);
 		this.onDrag      = this.onDrag.bind(this);
+
+		this.setContentsData = this.setContentsData.bind(this);
 
 		this.beforeMouseX = 0;
 	}
@@ -50,14 +63,17 @@ class SampleView extends React.Component {
 	componentDidMount(){
 	}
 
-	onDragStart( target, index, e ){
+	onDragStart( target, key, index, e ){
 		this.beforeMouseX = e.clientX;
 		this.setState( { draggingTarget : target } );
 	}
 
-	onDragStop( target, index, e ){
-		var beforeTime = this.state.contentsDatas[index].time;
-		var beforeWidth = this.state.contentsDatas[index].width;
+	onDragStop( target, key, index, e ){
+		var beforeTime = this.state.contentsDataMap[key][index].time;
+		var beforeWidth = this.state.contentsDataMap[key][index].width;
+
+		var newTime = beforeTime;
+		var newWidth = beforeWidth;
 
 		var deltaX = e.clientX - this.beforeMouseX;
 		this.beforeMouseX = e.clientX;
@@ -65,47 +81,88 @@ class SampleView extends React.Component {
 			switch(target){
 				case Define.DRAG_TARGET.BODY :
 				{
-					this.state.contentsDatas[index].time += deltaX/this.state.horizontalScaleWidth;
-					if(this.state.contentsDatas[index].time < 0){
-						this.state.contentsDatas[index].time = 0;
-					}
+					newTime += deltaX/this.state.horizontalScaleWidth;
 				}
 				break;
 				case Define.DRAG_TARGET.RIGHT :
 				{
-					this.state.contentsDatas[index].width += deltaX/this.state.horizontalScaleWidth;
-					if(this.state.contentsDatas[index].width < 0){
-						this.state.contentsDatas[index].width = 0;
-					}
+					newWidth += deltaX/this.state.horizontalScaleWidth;
 				}
 				break;
 				case Define.DRAG_TARGET.LEFT :
 				{
-					this.state.contentsDatas[index].width -= deltaX/this.state.horizontalScaleWidth;
-					if(this.state.contentsDatas[index].width < 0){
-						this.state.contentsDatas[index].width = 0;
-					}
-					this.state.contentsDatas[index].time  = beforeTime + (beforeWidth - this.state.contentsDatas[index].width);
-					if( this.state.contentsDatas[index].time < 0 ){
-						this.state.contentsDatas[index].time = 0;
-						this.state.contentsDatas[index].width = beforeWidth + beforeTime - this.state.contentsDatas[index].time;
-					}
+					newWidth -= deltaX/this.state.horizontalScaleWidth;
+					newTime += deltaX/this.state.horizontalScaleWidth;
 				}
 				break;
 			}
 		}
+		{ /* データの整合性チェック */
+			newWidth = Math.round(newWidth);
+			newTime = Math.round(newTime);
+			if( newWidth < 0 ){
+				newWidth = 0;
+				if( newTime != beforeTime ){
+					newTime = beforeTime + (beforeWidth - newWidth);
+				}
+			}
+			if( newTime < 0 ){
+				newTime = 0;
+				if( newWidth != beforeWidth ){
+					newWidth = beforeWidth + beforeTime - newTime;
+				}
+			}
+		}
+		this.setContentsData( key, index, newTime, newWidth );
 
 		this.setState(
 			{
-				contentsDatas  : this.state.contentsDatas,
-				draggingTarget : Define.DRAG_TARGET.NONE
+				contentsDataMap  : this.state.contentsDataMap,
+				draggingTarget   : Define.DRAG_TARGET.NONE
 			}
 		);
 	}
 
-	onDrag( target, index, e ){
+	onDrag( target, key, index, e ){
 		/* ドラッグが重かったらここを消す */
-//		this.onDragStop(target, index, e);
+//		this.onDragStop(target, key, index, e);
+	}
+
+	setContentsData( key,index,time,width ){
+		var targetData = this.state.contentsDataMap[key][index];
+		var previousData = this.state.contentsDataMap[key][index-1];
+		var nextData = this.state.contentsDataMap[key][index+1];
+		if( null != time ){
+			var oldTime = targetData.time;
+			if( time < oldTime ){
+				if( previousData ){
+					if(
+							targetData.data === Define.DATA.OFF
+							|| targetData.data === Define.DATA.ON
+					){
+							if( time <= previousData.time ){
+								this.setContentsData(key, index-1, time-1, null);
+							}
+					}
+				}
+			}
+			if( time > oldTime ){
+				if( nextData ){
+					if(
+							targetData.data === Define.DATA.OFF
+							|| targetData.data === Define.DATA.ON
+					){
+							if( time >= nextData.time ){
+								this.setContentsData(key, index+1, time+1, null);
+							}
+					}
+				}
+			}
+			targetData.time = time;
+		}
+		if( null != width ){
+			targetData.width = width;
+		}
 	}
 
 	render() {
@@ -162,135 +219,126 @@ const SampleViewBody = ({that}) => {
 				<div className='scrollable-contents-area'>
 					<div className='scrollable-contents-top-left' />
 					<div className='scrollable-contents-body'>
-						<div
-							className='scrollable-contents-header'
-						>
-							<HeaderScale that={that} />
-						</div>
-						<div
-							className='scrollable-contents-sidebar'
-						>
-							<SidebarScale that={that} />
-						</div>
+						<HeaderScale  that={that} />
+						<SidebarScale indexes={ Object.keys(that.state.contentsDataMap) } />
 						<div className='scrollable-contents'>
 							<ContentsVerticalScale that={that} />
 							<ContentsHorizontalScale that={that} />
-							<ContentsItems that={that} datas={that.state.contentsDatas}/>
+							<ContentsItems that={that} dataMap={that.state.contentsDataMap}/>
 						</div>
 					</div>
-					<Button bsStyle="warning" className="button0" onClick={(e) => {that.setState({ horizontalScaleWidth : that.state.horizontalScaleWidth/2 })}} >-</Button>
-					<Button bsStyle="primary" className="button1" onClick={(e) => {that.setState({ horizontalScaleWidth : that.state.horizontalScaleWidth*2 })}} >+</Button>
+					<Button bsStyle="warning" className="button0" onClick={(e) => {that.setState({ horizontalScaleWidth : that.state.horizontalScaleWidth/10 })}} >-</Button>
+					<Button bsStyle="primary" className="button1" onClick={(e) => {that.setState({ horizontalScaleWidth : that.state.horizontalScaleWidth*10 })}} >+</Button>
 				</div>
 			</div>
 	)
 }
 
-const ContentsItems = ({that,datas}) => (
-		<div className="contents-items">
-			{
-				datas.map(
-					function(data,index){
-						return(
-							<div key={`dragable-${index}`} className="contents-item">
-								<ContentsItemLeftBar that={that} data={data} index={index} />
-								<ContentsItemBody that={that} data={data} index={index} />
-								<ContentsItemRightBar that={that} data={data} index={index} />
-							</div>
-						);
+const ContentsItems = ({that,dataMap}) => {
+	var items = [];
+	{
+		var keys = Object.keys(dataMap);
+		for(var i = 0 ; i < keys.length ; i++ ){
+			var key = keys[i];
+			for( var j = 0 ; j < dataMap[key].length ; j++ ){
+				var data = dataMap[key][j];
+				var itemPartsConfig = [
+					{
+						dragTarget : Define.DRAG_TARGET.LEFT,
+						className : "handle contents-item-left-bar "+( (that.state.draggingTarget === Define.DRAG_TARGET.BODY)? "hidden" : "" ),
+						style : {},
+						x          : data.time * that.state.horizontalScaleWidth-6,
+						y          : i * Define.SCALE_VERTICAL_HEIGHT,
+					},
+					{
+						dragTarget : Define.DRAG_TARGET.RIGHT,
+						className : "handle contents-item-right-bar "+( (that.state.draggingTarget === Define.DRAG_TARGET.BODY)? "hidden" : "" ),
+						style : {},
+						x          : ( data.time + data.width ) * that.state.horizontalScaleWidth - 1,
+						y          : i * Define.SCALE_VERTICAL_HEIGHT,
+					},
+					{
+						dragTarget : Define.DRAG_TARGET.BODY,
+						className  : "handle contents-item-body ",
+						style      : { width : data.width * that.state.horizontalScaleWidth },
+						x          : data.time * that.state.horizontalScaleWidth,
+						y          : i * Define.SCALE_VERTICAL_HEIGHT,
 					}
+				];
+
+				items.push(
+					<div key={`dragable-${key}-${j}`} className={"contents-item "+ data.data}>
+						<ContentsItemParts that={that} partsConfig={itemPartsConfig[0]} keyword={key} index={j} data={dataMap[key][j]} />
+						<ContentsItemParts that={that} partsConfig={itemPartsConfig[1]} keyword={key} index={j} data={dataMap[key][j]} />
+						<ContentsItemParts that={that} partsConfig={itemPartsConfig[2]} keyword={key} index={j} data={dataMap[key][j]} />
+					</div>
 				)
 			}
-		</div>
-)
+		}
+	}
 
-
-const ContentsItemBody = ({that, data, index}) => (
-	<Draggable
-		axis="x"
-		defaultPosition={{x:data.time * that.state.horizontalScaleWidth, y:data.name * Define.SCALE_VERTICAL_HEIGHT}}
-		position={{x:data.time * that.state.horizontalScaleWidth,y:data.name * Define.SCALE_VERTICAL_HEIGHT}}
-		onStart={(e) => {that.onDragStart(Define.DRAG_TARGET.BODY,index,e)}}
-		onStop={(e) => {that.onDragStop(Define.DRAG_TARGET.BODY,index,e)}}
-		onDrag={(e) => {that.onDrag(Define.DRAG_TARGET.BODY,index,e)}}
-		handle=".contents-item-body"
-	>
-		<div
-			key={`data-${index}`}
-			className="contents-item-body"
-			style={
-				{
-					width : data.width * that.state.horizontalScaleWidth,
-				}
-			}
-		>
-		</div>
-	</Draggable>
-);
-
-const ContentsItemLeftBar = ({that, data, index}) => (
-	<Draggable
-		axis="x"
-		handle=".contents-item-left-bar"
-
-		defaultPosition={{x:data.time * that.state.horizontalScaleWidth, y : data.name * Define.SCALE_VERTICAL_HEIGHT}}
-		position={{x:data.time * that.state.horizontalScaleWidth, y : data.name * Define.SCALE_VERTICAL_HEIGHT}}
-		onStart={(e) => {that.onDragStart(Define.DRAG_TARGET.LEFT,index,e)}}
-		onDrag={(e) => {that.onDrag(Define.DRAG_TARGET.LEFT,index,e)}}
-		onStop={(e) => {that.onDragStop(Define.DRAG_TARGET.LEFT,index,e)}}
-	>
-		<div
-			className={"contents-item-left-bar "+( (that.state.draggingTarget === Define.DRAG_TARGET.BODY)? "hidden" : "" )}
-		>
-		</div>
-	</Draggable>
-);
-
-const ContentsItemRightBar = ({that, data, index}) => (
-	<Draggable
-		axis="x"
-		handle=".contents-item-right-bar"
-
-		defaultPosition={{x:data.time * that.state.horizontalScaleWidth + data.width * that.state.horizontalScaleWidth - 7, y : data.name * Define.SCALE_VERTICAL_HEIGHT}}
-		position={{x:data.time * that.state.horizontalScaleWidth + data.width * that.state.horizontalScaleWidth - 7, y : data.name * Define.SCALE_VERTICAL_HEIGHT}}
-		onStart={(e) => {that.onDragStart(Define.DRAG_TARGET.RIGHT,index,e)}}
-		onStop={(e) => {that.onDragStop(Define.DRAG_TARGET.RIGHT,index,e)}}
-		onDrag={(e) => {that.onDrag(Define.DRAG_TARGET.RIGHT,index,e)}}
-
-	>
-		<div
-			className={"contents-item-right-bar "+( (that.state.draggingTarget === Define.DRAG_TARGET.BODY)? "hidden" : "" ) }
-		>
-		</div>
-	</Draggable>
-);
-
-
-const SidebarScale = ({that}) => {
 	return (
-		<ul className="scale-sidebar">
-	    {SidebarScales}
-	  </ul>
+		<div className="contents-items">
+			{items}
+		</div>
+	)
+};
+
+
+const ContentsItemParts = ({that, partsConfig, keyword, keyIndex, index, data}) => (
+	<Draggable
+		axis="x"
+		handle=".handle"
+
+		defaultPosition={ { x: partsConfig.x, y: partsConfig.y  } }
+		position=       { { x: partsConfig.x, y: partsConfig.y } }
+		onStart=        { (e) => {that.onDragStart( partsConfig.dragTarget, keyword, index, e)}}
+		onStop=         { (e) => {that.onDragStop(  partsConfig.dragTarget, keyword, index, e)}}
+		onDrag=         { (e) => {that.onDrag(      partsConfig.dragTarget, keyword, index, e)}}
+	>
+		<div
+			className={partsConfig.className}
+			style={ partsConfig.style }
+		>
+		</div>
+	</Draggable>
+);
+
+
+const SidebarScale = ({indexes}) => {
+	var li = [];
+	{
+		for(var i = 0 ; i < indexes.length ; i++){
+			li.push( <li key={`sidebar-scale-${i}`}>{indexes[i]}</li> );
+		}
+	}
+	return (
+		<div className='scrollable-contents-sidebar'>
+			<ul className="scale-sidebar">
+				{li}
+			</ul>
+		</div>
 	)
 }
 
 
-const SidebarScales = scaleDatas.map(
-	function(item,index){
-  	return <li key={`item-${index}`}>{item.text}</li>
-	}
-);
-
 const HeaderScale = ({that}) => {
 	var li = [];
 	{
+		var style = {
+			width:that.state.horizontalScaleWidth,
+			visibility: (that.state.horizontalScaleWidth==10)?"visible":"hidden",
+		};
 		for(var i = 0 ; i < scaleDatas.length ; i++){
-			li.push( <li key={`item-${i}`} style={{ width:that.state.horizontalScaleWidth }} >{scaleDatas[i].text}</li> );
+			li.push( <li key={`item-${i}`} style={style} >{scaleDatas[i].text}</li> );
 		}
 	}
 	return (
-		<ul className="scale-header">
-			{li}
-	  </ul>
+		<div className='scrollable-contents-header'>
+			<ul className="scale-header">
+				{li}
+		  </ul>
+		</div>
 	)
 }
 
@@ -312,8 +360,12 @@ const ContentsHorizontalScale = ({that}) => {
 const ContentsVerticalScale = ({that}) => {
 	var li = [];
 	{
+		var style = {
+			width:that.state.horizontalScaleWidth,
+			visibility: (that.state.horizontalScaleWidth==10)?"visible":"hidden",
+		};
 		for(var i = 0 ; i < scaleDatas.length ; i++){
-			li.push( <li key={`item-${i}`} style={{ width:that.state.horizontalScaleWidth }} ></li> );
+			li.push( <li key={`item-${i}`} style={style} ></li> );
 		}
 	}
 	return (

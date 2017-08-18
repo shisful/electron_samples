@@ -21,7 +21,14 @@ export default class Define {
 	}
 
 	static get SCALE_HORIZONTAL_WIDTH(){
-		return 50;
+		return 1;
+	}
+
+	static get DATA(){
+		return {
+			ON : "on",
+			OFF : "off",
+		}
 	}
 
 	constructor() {

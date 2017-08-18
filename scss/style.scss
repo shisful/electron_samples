@@ -9,7 +9,10 @@ $scale-vertical-height:40px;
 
 $contents-item-border:1px solid darkblue;
 
-$contents-item-height:39px;
+$contents-item-height:25px;
+
+$contents-item-side-z:45;
+$contents-item-body-z:44;
 
 #sample-view-body {
   display : block;
@@ -35,7 +38,6 @@ $contents-item-height:39px;
 
     .contents-items {
       position:absolute;
-      top:($scale-vertical-height - $contents-item-height)/2;
       left:0px;
       width:$contents-width;
       height:$contents-height;
@@ -43,6 +45,8 @@ $contents-item-height:39px;
 
       .contents-item {
         overflow : initial;
+        top:($scale-vertical-height - $contents-item-height)/2;
+
         .hidden {
             display:none;
         }
@@ -51,27 +55,48 @@ $contents-item-height:39px;
           width : 7px;
           height : $contents-item-height;
           cursor : ew-resize;
-          z-index : 45;
-          border-left: $contents-item-border;
+          z-index : $contents-item-side-z;
+          border-right: $contents-item-border;
         }
 
         .contents-item-body {
           position:absolute;
           height : $contents-item-height;
-          background-color: skyblue;
           cursor : move;
-          z-index : 43;
+          z-index : $contents-item-body-z;
           border: $contents-item-border;
+          background-color: honeydew;
         }
+
         .contents-item-right-bar {
           position:absolute;
           height : $contents-item-height;
           width : 7px;
           cursor : ew-resize;
-          z-index : 45;
-          border-right: $contents-item-border;
+          z-index : $contents-item-side-z;
+          border-left: $contents-item-border;
         }
       }
+      .on {
+        top : 1px;
+        .contents-item-body {
+          background-color: moccasin;
+          z-index : $contents-item-body-z+2;
+        }
+        .contents-item-right-bar {
+          z-index : $contents-item-side-z+2;
+        }
+        .contents-item-left-bar {
+          z-index : $contents-item-side-z+2;
+        }
+      }
+      .off {
+        top : ($scale-vertical-height - $contents-item-height)-1px;
+        .contents-item-body {
+          background-color: skyblue;
+        }
+      }
+
     }
   }
 
@@ -127,7 +152,6 @@ $contents-item-height:39px;
     li{
       display:inline-block;
       border-right: 1px solid #ccc;
-      width : 1px;
     }
   }
 
