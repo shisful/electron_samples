@@ -4,8 +4,12 @@ $contents-height:2000px;
 $sidebar-width:50px;
 $header-height:50px;
 
-$scale-vertical-width:50px;
-$scale-horizon-height:50px;
+$scale-horizon-width:50px;
+$scale-vertical-height:40px;
+
+$contents-item-border:1px solid darkblue;
+
+$contents-item-height:39px;
 
 #sample-view-body {
   display : block;
@@ -20,6 +24,7 @@ $scale-horizon-height:50px;
     height : 100%;
     overflow: hidden;
     background-color: blue;
+    transform: translateZ(0); //ハードウェアアクセラレーションのため
   }
   .scrollable-contents-body {
     display : block;
@@ -30,7 +35,7 @@ $scale-horizon-height:50px;
 
     .contents-items {
       position:absolute;
-      top:0px;
+      top:($scale-vertical-height - $contents-item-height)/2;
       left:0px;
       width:$contents-width;
       height:$contents-height;
@@ -43,28 +48,28 @@ $scale-horizon-height:50px;
       .contents-item-left-bar {
         position:absolute;
         width : 7px;
-        height : $header-height;
+        height : $contents-item-height;
         cursor : ew-resize;
         z-index : 45;
-        border-left: 1px solid darkblue;
+        border-left: $contents-item-border;
       }
 
       .contents-item-body {
         position:absolute;
-        height : $header-height;
+        height : $contents-item-height;
         width : 100%;
         background-color: skyblue;
         cursor : move;
         z-index : 43;
-        border-bottom: 1px solid #bbb;
+        border: $contents-item-border;
       }
       .contents-item-right-bar {
         position:absolute;
-        height : $header-height;
+        height : $contents-item-height;
         width : 7px;
         cursor : ew-resize;
         z-index : 45;
-        border-right: 1px solid darkblue;
+        border-right: $contents-item-border;
       }
     }
   }
@@ -123,7 +128,7 @@ $scale-horizon-height:50px;
     padding : 0px;
     li{
       display:inline-block;
-      width : $scale-vertical-width;
+      width : $scale-horizon-width;
       border-right: 1px solid #bbb;
     }
   }
@@ -132,7 +137,7 @@ $scale-horizon-height:50px;
     padding : 0px;
     li{
       display:block;
-      height : $scale-horizon-height;
+      height : $scale-vertical-height;
       border-bottom: 1px solid #bbb;
     }
     li:nth-child(odd) {

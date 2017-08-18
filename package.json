@@ -1,13 +1,13 @@
 {
-  "name": "OpeLogViewer",
+  "name": "electron",
   "version": "1.0.0",
   "description": "![](https://raw.githubusercontent.com/wiki/naga3/electron-chat/ss.gif)",
   "main": "main.js",
   "scripts": {
     "build-css": "node-sass --include-path scss scss/style.scss css/style.css",
     "watch-css": "nodemon -e scss -x \"npm run build-css\"",
-    "start": "electron ./../OpeLogViewer",
-    "debug": "electron ./../OpeLogViewer --debug",
+    "start": "electron .",
+    "debug": "electron . --debug",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "babel ./app/jsx -d ./app/js",
     "pack": "build --dir",
@@ -55,7 +55,7 @@
   "keywords": [],
   "build": {
     "asar": false,
-    "appId": "OpeLogViewer",
+    "appId": "electron-sample",
     "nsis": {
       "perMachine": true,
       "language": 1041,

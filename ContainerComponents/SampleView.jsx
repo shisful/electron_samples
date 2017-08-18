@@ -36,6 +36,7 @@ class SampleView extends React.Component {
 		 scrollLeft    : 0,
 		 contentsDatas : contentsDatas,
 		 itemDragState : Define.DRAG_TARGET.NONE,
+		 horizontalScaleWidth : Define.SCALE_HORIZONTAL_WIDTH,
 		};
 
 		this.onScroll = this.onScroll.bind(this);
@@ -54,7 +55,7 @@ class SampleView extends React.Component {
 	}
 
 	onScroll(left,top){
-			this.setState({scrollTop : top ,scrollLeft : left});
+		this.setState({scrollTop : top ,scrollLeft : left});
 	}
 
 	onDragStart( target, index, e ){
@@ -72,7 +73,7 @@ class SampleView extends React.Component {
 			switch(target){
 				case Define.DRAG_TARGET.BODY :
 				{
-					this.state.contentsDatas[index].time += deltaX/50;
+					this.state.contentsDatas[index].time += deltaX/this.state.horizontalScaleWidth;
 					if(this.state.contentsDatas[index].time < 0){
 						this.state.contentsDatas[index].time = 0;
 					}
@@ -80,7 +81,7 @@ class SampleView extends React.Component {
 				break;
 				case Define.DRAG_TARGET.RIGHT :
 				{
-					this.state.contentsDatas[index].width += deltaX/50;
+					this.state.contentsDatas[index].width += deltaX/this.state.horizontalScaleWidth;
 					if(this.state.contentsDatas[index].width < 0){
 						this.state.contentsDatas[index].width = 0;
 					}
@@ -88,7 +89,7 @@ class SampleView extends React.Component {
 				break;
 				case Define.DRAG_TARGET.LEFT :
 				{
-					this.state.contentsDatas[index].width -= deltaX/50;
+					this.state.contentsDatas[index].width -= deltaX/this.state.horizontalScaleWidth;
 					if(this.state.contentsDatas[index].width < 0){
 						this.state.contentsDatas[index].width = 0;
 					}
@@ -111,6 +112,8 @@ class SampleView extends React.Component {
 	}
 
 	onDrag( target, index, e ){
+		/* ドラッグが重かったらここを消す */
+		this.onDragStop(target, index, e);
 	}
 
 	render() {
@@ -166,17 +169,31 @@ const SampleViewBody = ({that}) => {
 			<div id='sample-view-body'>
 				<div className='scrollable-contents-area'>
 					<div className='scrollable-contents-top-left' />
-					<div className='scrollable-contents-header' style={{left : -that.state.scrollLeft}}>
+					<div
+					 	className='scrollable-contents-header'
+					  style={
+							{
+								transform: "translateX(" + -that.state.scrollLeft + "px)"
+							}
+						}
+					>
 						<HeaderScale that={that} />
 					</div>
-					<div className='scrollable-contents-sidebar' style={{top : -that.state.scrollTop}}>
+					<div
+						className='scrollable-contents-sidebar'
+						style={
+							{
+								transform: "translateY(" + -that.state.scrollTop + "px)"
+							}
+						}
+					>
 						<SidebarScale that={that} />
 					</div>
 					<div className='scrollable-contents-body' onScroll={(event)=>{that.onScroll(event.target.scrollLeft,event.target.scrollTop);}}>
 						<div className='scrollable-contents'>
-							<BodyVerticalScale that={that} />
-							<BodyHorizonScale that={that} />
-							<BodyContents that={that} datas={that.state.contentsDatas}/>
+							<ContentsVerticalScale that={that} />
+							<ContentsHorizontalScale that={that} />
+							<ContentsItems that={that} datas={that.state.contentsDatas}/>
 						</div>
 					</div>
 				</div>
@@ -185,7 +202,7 @@ const SampleViewBody = ({that}) => {
 }
 
 
-const BodyContents = ({that,datas}) => {
+const ContentsItems = ({that,datas}) => {
 	return (
 		<div className="contents-items">
 			{
@@ -195,8 +212,8 @@ const BodyContents = ({that,datas}) => {
 								<Draggable
 									key={`dragable-${index}`}
 									axis="x"
-									defaultPosition={{x:data.time * 50,y:data.name * 50}}
-									position={{x:data.time * 50,y:data.name * 50}}
+									defaultPosition={{x:data.time * that.state.horizontalScaleWidth, y:data.name * Define.SCALE_VERTICAL_HEIGHT}}
+									position={{x:data.time * that.state.horizontalScaleWidth,y:data.name * Define.SCALE_VERTICAL_HEIGHT}}
 									onStart={(e) => {that.onDragStart(Define.DRAG_TARGET.BODY,index,e)}}
 									onStop={(e) => {that.onDragStop(Define.DRAG_TARGET.BODY,index,e)}}
 									onDrag={(e) => {that.onDrag(Define.DRAG_TARGET.BODY,index,e)}}
@@ -207,7 +224,7 @@ const BodyContents = ({that,datas}) => {
 										className="contents-item-body"
 										style={
 											{
-												width : data.width * 50,
+												width : data.width * that.state.horizontalScaleWidth,
 											}
 										}
 									>
@@ -226,8 +243,8 @@ const BodyContents = ({that,datas}) => {
 						 				axis="x"
 										handle=".contents-item-left-bar"
 
-										defaultPosition={{x:data.time * 50, y : data.name * 50}}
-										position={{x:data.time * 50, y : data.name * 50}}
+										defaultPosition={{x:data.time * that.state.horizontalScaleWidth, y : data.name * Define.SCALE_VERTICAL_HEIGHT}}
+										position={{x:data.time * that.state.horizontalScaleWidth, y : data.name * Define.SCALE_VERTICAL_HEIGHT}}
 										onStart={(e) => {that.onDragStart(Define.DRAG_TARGET.LEFT,index,e)}}
 										onDrag={(e) => {that.onDrag(Define.DRAG_TARGET.LEFT,index,e)}}
 										onStop={(e) => {that.onDragStop(Define.DRAG_TARGET.LEFT,index,e)}}
@@ -250,8 +267,8 @@ const BodyContents = ({that,datas}) => {
 										axis="x"
 										handle=".contents-item-right-bar"
 
-										defaultPosition={{x:data.time * 50 + data.width * 50 - 7, y : data.name * 50}}
-										position={{x:data.time * 50 + data.width * 50 - 7, y : data.name * 50}}
+										defaultPosition={{x:data.time * that.state.horizontalScaleWidth + data.width * that.state.horizontalScaleWidth - 7, y : data.name * Define.SCALE_VERTICAL_HEIGHT}}
+										position={{x:data.time * that.state.horizontalScaleWidth + data.width * that.state.horizontalScaleWidth - 7, y : data.name * Define.SCALE_VERTICAL_HEIGHT}}
 										onStart={(e) => {that.onDragStart(Define.DRAG_TARGET.RIGHT,index,e)}}
 										onStop={(e) => {that.onDragStop(Define.DRAG_TARGET.RIGHT,index,e)}}
 										onDrag={(e) => {that.onDrag(Define.DRAG_TARGET.RIGHT,index,e)}}
@@ -284,15 +301,15 @@ const HeaderScales = scaleDatas.map(
 		}
 );
 
-const BodyVerticalScale = ({that}) => {
+const ContentsVerticalScale = ({that}) => {
 	return (
 		<ul className="scale-contents-vertical">
-	    {BodyVerticalScales}
+	    {ContentsVerticalScales}
 	  </ul>
 	)
 }
 
-const BodyVerticalScales = scaleDatas.map(
+const ContentsVerticalScales = scaleDatas.map(
 	function(item,index){
   	return <li key={`item-${index}`}></li>
 		}
@@ -306,10 +323,10 @@ const SidebarScale = ({that}) => {
 	)
 }
 
-const BodyHorizonScale = ({that}) => {
+const ContentsHorizontalScale = ({that}) => {
 	return (
 		<ul className="scale-contents-horizon">
-	    {BodyHorizonScales}
+	    {ContentsHorizontalScales}
 	  </ul>
 	)
 }
@@ -320,7 +337,7 @@ const SidebarScales = scaleDatas.map(
 	}
 );
 
-const BodyHorizonScales = scaleDatas.map(
+const ContentsHorizontalScales = scaleDatas.map(
 	function(item,index){
   	return <li key={`item-${index}`}></li>
 		}

@@ -75,7 +75,6 @@ function CreateMainWindow() {
 	});
 	mainWindow.on('closed', function(){
 		mainWindow = null;
-		Quit();
 	});
 }
 
@@ -218,6 +217,16 @@ function SetMainWindowMenu(window) {
 							if (process.platform == 'darwin')
 								return 'Alt+Command+I';
 							else
+								return 'CmdOrCtrl+Shift+I';
+						})(),
+						click: function(item, focusedWindow) {
+							if (focusedWindow)
+								focusedWindow.toggleDevTools();
+						}
+					},
+					{
+						label: '拡大',
+						accelerator: (function() {
 								return 'Ctrl+Shift+I';
 						})(),
 						click: function(item, focusedWindow) {
@@ -227,6 +236,7 @@ function SetMainWindowMenu(window) {
 					},
 					]
 			},
+
 		];
 
 	var menu = Menu.buildFromTemplate(template);

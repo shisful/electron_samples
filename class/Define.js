@@ -16,6 +16,14 @@ export default class Define {
 		}
 	};
 
+	static get SCALE_VERTICAL_HEIGHT(){
+		return 40;
+	}
+
+	static get SCALE_HORIZONTAL_WIDTH(){
+		return 50;
+	}
+
 	constructor() {
 	}
 }
