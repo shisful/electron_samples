@@ -183,89 +183,85 @@ const SampleViewBody = ({that}) => {
 	)
 }
 
-
 const ContentsItems = ({that,datas}) => (
 		<div className="contents-items">
 			{
 				datas.map(
 					function(data,index){
 						return(
-								<Draggable
-									key={`dragable-${index}`}
-									axis="x"
-									defaultPosition={{x:data.time * that.state.horizontalScaleWidth, y:data.name * Define.SCALE_VERTICAL_HEIGHT}}
-									position={{x:data.time * that.state.horizontalScaleWidth,y:data.name * Define.SCALE_VERTICAL_HEIGHT}}
-									onStart={(e) => {that.onDragStart(Define.DRAG_TARGET.BODY,index,e)}}
-									onStop={(e) => {that.onDragStop(Define.DRAG_TARGET.BODY,index,e)}}
-									onDrag={(e) => {that.onDrag(Define.DRAG_TARGET.BODY,index,e)}}
-									handle=".contents-item-body"
-								>
-									<div
-										key={`data-${index}`}
-										className="contents-item-body"
-										style={
-											{
-												width : data.width * that.state.horizontalScaleWidth,
-											}
-										}
-									>
-									</div>
-								</Draggable>
-						 );
+							<div key={`dragable-${index}`} className="contents-item">
+								<ContentsItemLeftBar that={that} data={data} index={index} />
+								<ContentsItemBody that={that} data={data} index={index} />
+								<ContentsItemRightBar that={that} data={data} index={index} />
+							</div>
+						);
 					}
 				)
 			}
-			{
-					datas.map(
-						function(data,index){
-					  	return(
-									<Draggable
-						 		  	key={`dragable-${index}`}
-						 				axis="x"
-										handle=".contents-item-left-bar"
-
-										defaultPosition={{x:data.time * that.state.horizontalScaleWidth, y : data.name * Define.SCALE_VERTICAL_HEIGHT}}
-										position={{x:data.time * that.state.horizontalScaleWidth, y : data.name * Define.SCALE_VERTICAL_HEIGHT}}
-										onStart={(e) => {that.onDragStart(Define.DRAG_TARGET.LEFT,index,e)}}
-										onDrag={(e) => {that.onDrag(Define.DRAG_TARGET.LEFT,index,e)}}
-										onStop={(e) => {that.onDragStop(Define.DRAG_TARGET.LEFT,index,e)}}
-						 			>
-							 		 	<div
-							 				className={"contents-item-left-bar "+( (that.state.draggingTarget === Define.DRAG_TARGET.BODY)? "hidden" : "" )}
-							 			>
-									 	</div>
-							 		</Draggable>
-					 		);
-						}
-					)
-			}
-			{
-					datas.map(
-						function(data,index){
-							return(
-									<Draggable
-										key={`dragable-${index}`}
-										axis="x"
-										handle=".contents-item-right-bar"
-
-										defaultPosition={{x:data.time * that.state.horizontalScaleWidth + data.width * that.state.horizontalScaleWidth - 7, y : data.name * Define.SCALE_VERTICAL_HEIGHT}}
-										position={{x:data.time * that.state.horizontalScaleWidth + data.width * that.state.horizontalScaleWidth - 7, y : data.name * Define.SCALE_VERTICAL_HEIGHT}}
-										onStart={(e) => {that.onDragStart(Define.DRAG_TARGET.RIGHT,index,e)}}
-										onStop={(e) => {that.onDragStop(Define.DRAG_TARGET.RIGHT,index,e)}}
-										onDrag={(e) => {that.onDrag(Define.DRAG_TARGET.RIGHT,index,e)}}
-
-									>
-										<div
-											className={"contents-item-right-bar "+( (that.state.draggingTarget === Define.DRAG_TARGET.BODY)? "hidden" : "" ) }
-										>
-										</div>
-									</Draggable>
-							 );
-						}
-					)
-			}
 		</div>
 )
+
+
+const ContentsItemBody = ({that, data, index}) => (
+	<Draggable
+		axis="x"
+		defaultPosition={{x:data.time * that.state.horizontalScaleWidth, y:data.name * Define.SCALE_VERTICAL_HEIGHT}}
+		position={{x:data.time * that.state.horizontalScaleWidth,y:data.name * Define.SCALE_VERTICAL_HEIGHT}}
+		onStart={(e) => {that.onDragStart(Define.DRAG_TARGET.BODY,index,e)}}
+		onStop={(e) => {that.onDragStop(Define.DRAG_TARGET.BODY,index,e)}}
+		onDrag={(e) => {that.onDrag(Define.DRAG_TARGET.BODY,index,e)}}
+		handle=".contents-item-body"
+	>
+		<div
+			key={`data-${index}`}
+			className="contents-item-body"
+			style={
+				{
+					width : data.width * that.state.horizontalScaleWidth,
+				}
+			}
+		>
+		</div>
+	</Draggable>
+);
+
+const ContentsItemLeftBar = ({that, data, index}) => (
+	<Draggable
+		axis="x"
+		handle=".contents-item-left-bar"
+
+		defaultPosition={{x:data.time * that.state.horizontalScaleWidth, y : data.name * Define.SCALE_VERTICAL_HEIGHT}}
+		position={{x:data.time * that.state.horizontalScaleWidth, y : data.name * Define.SCALE_VERTICAL_HEIGHT}}
+		onStart={(e) => {that.onDragStart(Define.DRAG_TARGET.LEFT,index,e)}}
+		onDrag={(e) => {that.onDrag(Define.DRAG_TARGET.LEFT,index,e)}}
+		onStop={(e) => {that.onDragStop(Define.DRAG_TARGET.LEFT,index,e)}}
+	>
+		<div
+			className={"contents-item-left-bar "+( (that.state.draggingTarget === Define.DRAG_TARGET.BODY)? "hidden" : "" )}
+		>
+		</div>
+	</Draggable>
+);
+
+const ContentsItemRightBar = ({that, data, index}) => (
+	<Draggable
+		axis="x"
+		handle=".contents-item-right-bar"
+
+		defaultPosition={{x:data.time * that.state.horizontalScaleWidth + data.width * that.state.horizontalScaleWidth - 7, y : data.name * Define.SCALE_VERTICAL_HEIGHT}}
+		position={{x:data.time * that.state.horizontalScaleWidth + data.width * that.state.horizontalScaleWidth - 7, y : data.name * Define.SCALE_VERTICAL_HEIGHT}}
+		onStart={(e) => {that.onDragStart(Define.DRAG_TARGET.RIGHT,index,e)}}
+		onStop={(e) => {that.onDragStop(Define.DRAG_TARGET.RIGHT,index,e)}}
+		onDrag={(e) => {that.onDrag(Define.DRAG_TARGET.RIGHT,index,e)}}
+
+	>
+		<div
+			className={"contents-item-right-bar "+( (that.state.draggingTarget === Define.DRAG_TARGET.BODY)? "hidden" : "" ) }
+		>
+		</div>
+	</Draggable>
+);
+
 
 const HeaderScale = ({that}) => {
 	return (

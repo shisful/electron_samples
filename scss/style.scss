@@ -41,34 +41,36 @@ $contents-item-height:39px;
       height:$contents-height;
       z-index : 42;
 
-      .hidden {
-          display:none;
-      }
+      .contents-item {
+        overflow : initial;
+        .hidden {
+            display:none;
+        }
+        .contents-item-left-bar {
+          position:absolute;
+          width : 7px;
+          height : $contents-item-height;
+          cursor : ew-resize;
+          z-index : 45;
+          border-left: $contents-item-border;
+        }
 
-      .contents-item-left-bar {
-        position:absolute;
-        width : 7px;
-        height : $contents-item-height;
-        cursor : ew-resize;
-        z-index : 45;
-        border-left: $contents-item-border;
-      }
-
-      .contents-item-body {
-        position:absolute;
-        height : $contents-item-height;
-        background-color: skyblue;
-        cursor : move;
-        z-index : 43;
-        border: $contents-item-border;
-      }
-      .contents-item-right-bar {
-        position:absolute;
-        height : $contents-item-height;
-        width : 7px;
-        cursor : ew-resize;
-        z-index : 45;
-        border-right: $contents-item-border;
+        .contents-item-body {
+          position:absolute;
+          height : $contents-item-height;
+          background-color: skyblue;
+          cursor : move;
+          z-index : 43;
+          border: $contents-item-border;
+        }
+        .contents-item-right-bar {
+          position:absolute;
+          height : $contents-item-height;
+          width : 7px;
+          cursor : ew-resize;
+          z-index : 45;
+          border-right: $contents-item-border;
+        }
       }
     }
   }
