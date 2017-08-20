@@ -331,13 +331,17 @@ const Header = ({that}) => {
 			width: pxPerScale,
 		};
 		var labelStyle = {
-			width: pxPerScale*8,
-			left : -pxPerScale*4,
+			width: pxPerScale*10,
+			left : -pxPerScale*5,
+		};
+		var lastLabelStyle = {
+			width: pxPerScale*10,
+			left : -pxPerScale*10,
 		};
 		var scaleNum;
 		{
 			scaleNum = that.state.contentsDataTimeMax/usPerScale;
-			scaleNum += 11 - scaleNum % 10;
+			scaleNum += 15 - scaleNum % 10;
 		}
 		for(var i = 0 ; i < scaleNum ; i++){
 			var scaleText="";
@@ -363,7 +367,11 @@ const Header = ({that}) => {
 					scaleText = us / scaleUnitTime + scale;
 				}
 			}
-			li.push( <li key={`item-${i}`} style={style} ><div className="label" style={labelStyle} >{scaleText}</div></li> );
+			if(i > scaleNum - 5 ){
+				li.push( <li key={`item-${i}`} style={style} ><div className="label" style={lastLabelStyle}>{scaleText}</div></li> );
+			}else{
+				li.push( <li key={`item-${i}`} style={style} ><div className="label" style={labelStyle} >{scaleText}</div></li> );
+			}
 		}
 	}
 	return (
@@ -379,8 +387,21 @@ const Header = ({that}) => {
 const ContentsHorizontalScale = ({that}) => {
 	var li = [];
 	{
+		var usPerScale = Define.SCALE_HORIZONTAL[ that.state.scaleIndex ].usPerScale;
+		var pxPerUs = Define.SCALE_HORIZONTAL[ that.state.scaleIndex ].pxPerUs;
+		var pxPerScale = pxPerUs * usPerScale;
+
+		var scaleNum;
+		{
+			scaleNum = that.state.contentsDataTimeMax/usPerScale;
+			scaleNum += 15 - scaleNum % 10;
+		}
+		var style = {
+			width: scaleNum * pxPerScale
+		};
+
 		for(var i = 0 ; i < Object.keys(that.state.contentsDataMap).length ; i++){
-			li.push( <li key={`item-${i}`} ></li> );
+			li.push( <li key={`item-${i}`} style={style}></li> );
 		}
 	}
 	return (
@@ -396,8 +417,11 @@ const ContentsVerticalScale = ({that}) => {
 		var usPerScale = Define.SCALE_HORIZONTAL[ that.state.scaleIndex ].usPerScale;
 		var pxPerUs = Define.SCALE_HORIZONTAL[ that.state.scaleIndex ].pxPerUs;
 		var pxPerScale = pxPerUs * usPerScale;
+
+		var height = Object.keys(that.state.contentsDataMap).length * Define.SCALE_VERTICAL_HEIGHT;
 		var style = {
 			width: pxPerScale,
+			height: height,
 		};
 		var scaleNum;
 		{
