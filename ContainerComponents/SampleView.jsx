@@ -25,30 +25,9 @@ class SampleView extends React.Component {
 
 	constructor(props) {
 		super(props);
-		var contentsDataTimeMax = 0;
-		var contentsDataMap = [];
-		{
-			var contentsDatas = [];
-			for( var i = 0 ; i < 10;i++){
-				contentsDatas.push( { key:i%5, data: "on" ,  time: i*1000,     width:2000 } );
-				contentsDatas.push( { key:i%5, data: "off" , time: (i+2)*1000, width:2000 } );
-			}
-			{
-				for( var i = 0 ; i < contentsDatas.length ; i++ ){
-					var key = contentsDatas[i].key;
-					if( !contentsDataMap[ key ] ){
-						contentsDataMap[ key ] = [];
-					}
-					contentsDataMap[ key ].push( contentsDatas[i] );
-					if( contentsDatas[i].time + contentsDatas[i].width > contentsDataTimeMax ){
-						contentsDataTimeMax = contentsDatas[i].time + contentsDatas[i].width;
-					}
-				}
-			}
-		}
 		this.state = {
-			contentsDataTimeMax : contentsDataTimeMax,
-			contentsDataMap : contentsDataMap,
+			contentsDataTimeMax : 0,
+			contentsDataMap : [],
 			draggingTarget : Define.DRAG_TARGET.NONE,
 			scaleIndex : Define.SCALE_HORIZONTAL_WIDTH_DEFAULT_INDEX,
 		};
@@ -61,13 +40,110 @@ class SampleView extends React.Component {
 		this.scaleZoomIn = this.scaleZoomIn.bind(this);
 		this.scaleZoomOut = this.scaleZoomOut.bind(this);
 
+		this.setDatas = this.setDatas.bind(this);
+		this.addData = this.addData.bind(this);
+		this.removeData = this.removeData.bind(this);
+		this._addData = this._addData.bind(this);
+
 		this.beforeMouseX = 0;
+
+		{
+			var contentsDatas = [];
+			for( var i = 0 ; i < 10;i++){
+				contentsDatas.push( { key:i%5, data: "on" ,  time: i*1000,     width:2000 } );
+				contentsDatas.push( { key:i%5, data: "off" , time: (i+2)*1000, width:2000 } );
+			}
+			contentsDatas.push( { key:0%5, data: "on" ,  time: 0*1000,     width:2000 } );
+			this.setDatas(contentsDatas);
+		}
+
 	}
 
 	componentDidUpdate(prevProps, prevState){
 	}
 
 	componentDidMount(){
+	}
+
+	addData(data){
+		console.log("addData");
+		this._addData(data);
+		this.setState(
+			{
+				contentsDataTimeMax : this.state.contentsDataTimeMax,
+				contentsDataMap : this.state.contentsDataMap
+			}
+		);
+	}
+
+	removeData(key,index){
+		if( this.state.contentsDataMap[key] ){
+			if( this.state.contentsDataMap[key][index] ){
+				var timeMax = this.state.contentsDataMap[key][index].time + this.state.contentsDataMap[key][index].width;
+				this.state.contentsDataMap[key].splice(index,1);
+
+				if( timeMax == this.state.contentsDataTimeMax ){
+					this.state.contentsDataTimeMax = 0;
+					for( var key in Object.keys(this.state.contentsDataMap) ){
+						for( var i = 0 ; i < this.state.contentsDataMap[key].length ; i++ ){
+							var targetTimeMax = this.state.contentsDataMap[key][i].time + this.state.contentsDataMap[key][i].width;
+							if( targetTimeMax > this.state.contentsDataTimeMax ){
+								this.state.contentsDataTimeMax = targetTimeMax;
+							}
+						}
+					}
+					this.setState(
+						{
+							contentsDataTimeMax : this.state.contentsDataTimeMax,
+							contentsDataMap : this.state.contentsDataMap
+						}
+					);
+				}else{
+					this.setState(
+						{
+							contentsDataMap : this.state.contentsDataMap
+						}
+					);
+				}
+			}
+		}
+	}
+
+	setDatas(datas){
+		this.state.contentsDataTimeMax = 0;
+		this.state.contentsData = [];
+
+		for( var i = 0 ; i < datas.length ; i++ ){
+			this._addData(datas[i]);
+		}
+
+		this.setState(
+			{
+				contentsDataTimeMax : this.state.contentsDataTimeMax,
+				contentsDataMap : this.state.contentsDataMap
+			}
+		);
+	}
+
+	_addData(data){
+		var key = data.key;
+		if( !this.state.contentsDataMap[ key ] ){
+			this.state.contentsDataMap[ key ] = [];
+		}
+		var insertIndex = this.state.contentsDataMap[ key ].length;
+		for( var i = 0 ; i < this.state.contentsDataMap[ key ].length ; i++ ){
+			if( data.time == this.state.contentsDataMap[ key ][ i ].time ){
+				data.time++;
+			}else if( data.time < this.state.contentsDataMap[ key ][ i ].time ){
+				insertIndex = i;
+				break;
+			}
+		}
+		this.state.contentsDataMap[ key ].splice(insertIndex,0,data);
+
+		if( data.time + data.width > this.state.contentsDataTimeMax ){
+			this.state.contentsDataTimeMax = data.time + data.width;
+		}
 	}
 
 	onDragStart( target, key, index, e ){
@@ -196,7 +272,7 @@ class SampleView extends React.Component {
 
 	render() {
 		return (
-			<SampleViewBody that={this}/>
+			<SampleViewBody that={this} dataMap={this.state.contentsDataMap}/>
 		);
 	}
 }
@@ -212,18 +288,18 @@ var scaleDatas = [];
 }
 
 
-const SampleViewBody = ({that}) => {
+const SampleViewBody = ({that,dataMap}) => {
 	return (
 			<div id='sample-view-body'>
 				<div className='scrollable-contents-area'>
 					<div className='scrollable-contents-top-left' />
 					<div className='scrollable-contents-body'>
 						<Header  that={that} />
-						<Sidebar indexes={ Object.keys(that.state.contentsDataMap) } />
+						<Sidebar indexes={ Object.keys( dataMap ) } />
 						<div className='scrollable-contents'>
 							<ContentsVerticalLines that={that} />
 							<ContentsHorizontalLines that={that} />
-							<ContentsItems that={that} dataMap={that.state.contentsDataMap}/>
+							<ContentsItems that={that} dataMap={dataMap}/>
 						</div>
 					</div>
 					<Button bsStyle="warning" className="button0" onClick={(e) => { that.scaleZoomOut(); }} >-</Button>
@@ -323,7 +399,12 @@ const Sidebar = ({indexes}) => {
 const Header = ({that}) => {
 	return (
 		<div className='scrollable-contents-header'>
-			<VerticalLists that={that} isHeader={true} />
+			<VerticalLists
+				isHeader={true}
+				scale={ Define.SCALE_HORIZONTAL[ that.state.scaleIndex ] }
+				maxTime={that.state.contentsDataTimeMax}
+				keyLength={Object.keys(that.state.contentsDataMap).length}
+			/>
 		</div>
 	)
 }
@@ -357,25 +438,31 @@ const ContentsHorizontalLines = ({that}) => {
 }
 
 const ContentsVerticalLines = ({that}) => {
-	return <VerticalLists that={that} isHeader={false} />
+	return (
+	 	<VerticalLists
+	 		isHeader={false}
+			scale={ Define.SCALE_HORIZONTAL[ that.state.scaleIndex ] }
+			maxTime={ that.state.contentsDataTimeMax }
+			keyLength={ Object.keys(that.state.contentsDataMap).length }
+		/>
+	);
 }
 
 
-const VerticalLists = ({that, isHeader}) => {
+const VerticalLists = ({scale, maxTime, keyLength, isHeader}) => {
 	var lis = [];
 	{
-		var usPerScale = Define.SCALE_HORIZONTAL[ that.state.scaleIndex ].usPerScale;
-		var pxPerUs = Define.SCALE_HORIZONTAL[ that.state.scaleIndex ].pxPerUs;
+		var usPerScale = scale.usPerScale;
+		var pxPerUs = scale.pxPerUs;
 		var pxPerScale = pxPerUs * usPerScale;
 
-		var height = Object.keys(that.state.contentsDataMap).length * Define.SCALE_VERTICAL_HEIGHT;
+		var height = keyLength * Define.SCALE_VERTICAL_HEIGHT;
 
 		var scaleNum;
 		{
-			scaleNum = that.state.contentsDataTimeMax/usPerScale;
+			scaleNum = maxTime/usPerScale;
 			scaleNum += 15 - scaleNum % 10;
 		}
-
 		for(var i = 0 ; i < scaleNum ; i++){
 			if( isHeader ){
 				lis.push( <HeaderScaleLi key={`item-${i}`} pxPerScale={pxPerScale} us={i*usPerScale} isLast={(i > scaleNum - 5 )} /> );
