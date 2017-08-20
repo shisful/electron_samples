@@ -221,8 +221,8 @@ const SampleViewBody = ({that}) => {
 						<Header  that={that} />
 						<Sidebar indexes={ Object.keys(that.state.contentsDataMap) } />
 						<div className='scrollable-contents'>
-							<ContentsVerticalScale that={that} />
-							<ContentsHorizontalScale that={that} />
+							<ContentsVerticalLines that={that} />
+							<ContentsHorizontalLines that={that} />
 							<ContentsItems that={that} dataMap={that.state.contentsDataMap}/>
 						</div>
 					</div>
@@ -321,70 +321,15 @@ const Sidebar = ({indexes}) => {
 
 
 const Header = ({that}) => {
-	var li = [];
-	{
-		var usPerScale = Define.SCALE_HORIZONTAL[ that.state.scaleIndex ].usPerScale;
-		var pxPerUs = Define.SCALE_HORIZONTAL[ that.state.scaleIndex ].pxPerUs;
-		var pxPerScale = pxPerUs * usPerScale;
-
-		var style = {
-			width: pxPerScale,
-		};
-		var labelStyle = {
-			width: pxPerScale*10,
-			left : -pxPerScale*5,
-		};
-		var lastLabelStyle = {
-			width: pxPerScale*10,
-			left : -pxPerScale*10,
-		};
-		var scaleNum;
-		{
-			scaleNum = that.state.contentsDataTimeMax/usPerScale;
-			scaleNum += 15 - scaleNum % 10;
-		}
-		for(var i = 0 ; i < scaleNum ; i++){
-			var scaleText="";
-			{
-//			if( 0 == i%10 ){
-				var us = i*usPerScale;
-				{
-					var usStr=""+us;
-					var scale;
-					var scaleUnitTime = Math.pow(10,usStr.length-1);
-					switch( usStr.length ){
-						case 1:
-						case 2:
-						case 3: scaleUnitTime = 1; scale = "us"; break;
-						case 4:
-						case 5:
-						case 6: scaleUnitTime = 1000; scale = "ms"; break;
-						case 7:
-						case 8:
-						case 9:
-						default : scaleUnitTime = 1000000 ;scale = "s"; break;
-					}
-					scaleText = us / scaleUnitTime + scale;
-				}
-			}
-			if(i > scaleNum - 5 ){
-				li.push( <li key={`item-${i}`} style={style} ><div className="label" style={lastLabelStyle}>{scaleText}</div></li> );
-			}else{
-				li.push( <li key={`item-${i}`} style={style} ><div className="label" style={labelStyle} >{scaleText}</div></li> );
-			}
-		}
-	}
 	return (
 		<div className='scrollable-contents-header'>
-			<ul className="scale-header" >
-				{li}
-		  </ul>
+			<VerticalLists that={that} isHeader={true} />
 		</div>
 	)
 }
 
 
-const ContentsHorizontalScale = ({that}) => {
+const ContentsHorizontalLines = ({that}) => {
 	var li = [];
 	{
 		var usPerScale = Define.SCALE_HORIZONTAL[ that.state.scaleIndex ].usPerScale;
@@ -411,34 +356,97 @@ const ContentsHorizontalScale = ({that}) => {
 	)
 }
 
-const ContentsVerticalScale = ({that}) => {
-	var li = [];
+const ContentsVerticalLines = ({that}) => {
+	return <VerticalLists that={that} isHeader={false} />
+}
+
+
+const VerticalLists = ({that, isHeader}) => {
+	var lis = [];
 	{
 		var usPerScale = Define.SCALE_HORIZONTAL[ that.state.scaleIndex ].usPerScale;
 		var pxPerUs = Define.SCALE_HORIZONTAL[ that.state.scaleIndex ].pxPerUs;
 		var pxPerScale = pxPerUs * usPerScale;
 
 		var height = Object.keys(that.state.contentsDataMap).length * Define.SCALE_VERTICAL_HEIGHT;
-		var style = {
-			width: pxPerScale,
-			height: height,
-		};
+
 		var scaleNum;
 		{
 			scaleNum = that.state.contentsDataTimeMax/usPerScale;
-			scaleNum += 10 - scaleNum % 10;
+			scaleNum += 15 - scaleNum % 10;
 		}
 
 		for(var i = 0 ; i < scaleNum ; i++){
-			li.push( <li key={`item-${i}`} style={style} ></li> );
+			if( isHeader ){
+				lis.push( <HeaderScaleLi key={`item-${i}`} pxPerScale={pxPerScale} us={i*usPerScale} isLast={(i > scaleNum - 5 )} /> );
+			}else{
+				lis.push( <ContentsVerticalLine key={`item-${i}`} pxPerScale={pxPerScale} height={height} /> );
+			}
 		}
 	}
-	return (
-		<ul className="scale-contents-vertical">
-			{li}
-		</ul>
-	)
+	if( isHeader ){
+		return (
+			<ul className="scale-header" >
+				{lis}
+			</ul>
+		);
+	}else{
+		return (
+			<ul className="scale-contents-vertical">
+				{lis}
+			</ul>
+		);
+	}
 }
+
+const HeaderScaleLi = ({pxPerScale,us,isLast}) => {
+	var style = {
+		width : pxPerScale,
+	};
+	var labelStyle;
+	{
+		if( isLast ){
+			labelStyle = {
+				width: pxPerScale*10,
+				left : -pxPerScale*10,
+			};
+		}else{
+			labelStyle = {
+				width: pxPerScale*10,
+				left : -pxPerScale*5,
+			};
+		}
+	}
+	var scaleText="";
+	{
+		var usStr=""+us;
+		var scale;
+		var scaleUnitTime = Math.pow(10,usStr.length-1);
+		switch( usStr.length ){
+			case 1:
+			case 2:
+			case 3: scaleUnitTime = 1; scale = "us"; break;
+			case 4:
+			case 5:
+			case 6: scaleUnitTime = 1000; scale = "ms"; break;
+			case 7:
+			case 8:
+			case 9:
+			default : scaleUnitTime = 1000000 ;scale = "s"; break;
+		}
+		scaleText = us / scaleUnitTime + scale;
+	}
+	return <li style={style} ><div className="label" style={labelStyle}>{scaleText}</div></li>
+}
+
+const ContentsVerticalLine = ({pxPerScale,height}) => {
+	var style = {
+		width : pxPerScale,
+		height : height,
+	};
+	return <li style={style} ></li>
+}
+
 
 
 /* propsの型指定を行う */
