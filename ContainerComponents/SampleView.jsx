@@ -49,11 +49,11 @@ class SampleView extends React.Component {
 
 		{
 			var contentsDatas = [];
-			for( var i = 0 ; i < 10;i++){
+			for( var i = 0 ; i < 5;i++){
 				contentsDatas.push( { key:i%5, data: "on" ,  time: i*1000,     width:2000 } );
-				contentsDatas.push( { key:i%5, data: "off" , time: (i+2)*1000, width:2000 } );
+				contentsDatas.push( { key:i%5, data: "off" ,  time: i*1000 + 500,     width:2000 } );
 			}
-			contentsDatas.push( { key:0%5, data: "on" ,  time: 0*1000,     width:2000 } );
+			contentsDatas.push( { key:1, data: "on" ,  time: 4000,     width:0 } );
 			this.setDatas(contentsDatas);
 		}
 
@@ -317,27 +317,32 @@ const ContentsItems = ({that,dataMap}) => {
 			var key = keys[i];
 			for( var j = 0 ; j < dataMap[key].length ; j++ ){
 				var data = dataMap[key][j];
+				var bodyX = data.time * Define.SCALE_HORIZONTAL[ that.state.scaleIndex ].pxPerUs - Define.ITEM_EDGE_WIDTH;
+				var y = i * Define.SCALE_VERTICAL_HEIGHT;
 				var itemPartsConfig = [
 					{
 						dragTarget : Define.DRAG_TARGET.LEFT,
 						className : "handle contents-item-left-bar "+( (that.state.draggingTarget === Define.DRAG_TARGET.BODY)? "hidden" : "" ),
 						style : {},
-						x          : data.time * Define.SCALE_HORIZONTAL[ that.state.scaleIndex ].pxPerUs-6,
-						y          : i * Define.SCALE_VERTICAL_HEIGHT,
+						centerStyle: {},
+						x          : bodyX - 10,
+						y          : y,
 					},
 					{
 						dragTarget : Define.DRAG_TARGET.RIGHT,
 						className : "handle contents-item-right-bar "+( (that.state.draggingTarget === Define.DRAG_TARGET.BODY)? "hidden" : "" ),
 						style : {},
-						x          : ( data.time + data.width ) * Define.SCALE_HORIZONTAL[ that.state.scaleIndex ].pxPerUs - 1,
-						y          : i * Define.SCALE_VERTICAL_HEIGHT,
+						centerStyle: {},
+						x          : bodyX + ( data.width * Define.SCALE_HORIZONTAL[ that.state.scaleIndex ].pxPerUs ) + Define.ITEM_EDGE_WIDTH - 1,
+						y          : y,
 					},
 					{
 						dragTarget : Define.DRAG_TARGET.BODY,
 						className  : "handle contents-item-body ",
-						style      : { width : data.width * Define.SCALE_HORIZONTAL[ that.state.scaleIndex ].pxPerUs },
-						x          : data.time * Define.SCALE_HORIZONTAL[ that.state.scaleIndex ].pxPerUs,
-						y          : i * Define.SCALE_VERTICAL_HEIGHT,
+						style      : { width : data.width * Define.SCALE_HORIZONTAL[ that.state.scaleIndex ].pxPerUs + Define.ITEM_EDGE_WIDTH*2 },
+						centerStyle: { width : data.width * Define.SCALE_HORIZONTAL[ that.state.scaleIndex ].pxPerUs},
+						x          : bodyX,
+						y          : y,
 					}
 				];
 				items.push(
@@ -374,6 +379,11 @@ const ContentsItemParts = ({that, partsConfig, keyword, keyIndex, index, data}) 
 			className={partsConfig.className}
 			style={ partsConfig.style }
 		>
+			<div className="left-back" />
+			<div className="left" />
+			<div className="right-back" />
+			<div className="right" />
+			<div className="center" style={partsConfig.centerStyle} />
 		</div>
 	</Draggable>
 );

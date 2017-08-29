@@ -22,6 +22,10 @@ export default class Define {
 		return 40;
 	}
 
+	static get ITEM_EDGE_WIDTH(){
+		return 14.5;
+	}
+
 	static get SCALE_HORIZONTAL(){
 		return SCALE;
 	}
@@ -43,7 +47,7 @@ export default class Define {
 	}
 
 	static get SCALE_HORIZONTAL_WIDTH_DEFAULT_INDEX(){
-		return 10;
+		return 15;
 	}
 
 	static get DATA(){

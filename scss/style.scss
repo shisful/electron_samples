@@ -10,10 +10,9 @@ $scale-vertical-height:40px;
 $contents-item-border:1px solid darkblue;
 
 $contents-item-height:25px;
-
-$contents-item-side-z:45;
-$contents-item-body-z:44;
-
+$contents-item-edge-width:10px;
+$contents-item-side-z:40;
+$contents-item-body-z:45;
 #sample-view-body {
   display : block;
   background-color: black;
@@ -59,36 +58,117 @@ $contents-item-body-z:44;
             @extend .contents-item-parts;
             cursor : move;
             z-index : $contents-item-body-z;
-            border: $contents-item-border;
-            background-color: honeydew;
-        }
+            display:block;
+            .center{
+                position:absolute;
+                height: 100%;
+                left:$contents-item-height/2;
+                border: $contents-item-border;
+                border-left-color: moccasin;
+                border-right-color:moccasin;
+                background-color: moccasin;
+                z-index:$contents-item-body-z+2;
+                &.on {
+                    border-left-color: moccasin;
+                    border-right-color:moccasin;
+                    background-color: moccasin;
+                }
+                &.off {
+                    border-left-color: skyblue;
+                    border-right-color:skyblue;
+                    background-color:  skyblue;
+                }
 
-        .contents-item-right-bar {
+            }
+            .left{
+                position:absolute;
+                border:$contents-item-height/2 solid transparent;
+                border-right-color: moccasin;
+                border-left-width: 1px;
+                z-index:$contents-item-body-z + 1;
+                &.on {
+                    border-right-color: moccasin;
+                }
+                &.off {
+                    border-right-color: skyblue;
+                }
+            }
+            .left-back {
+                position:absolute;
+                border: ($contents-item-height/2) solid transparent;
+                border-right-color: darkblue;
+                border-left:none;
+                z-index:$contents-item-body-z - 1;
+            }
+            .right{
+                position:absolute;
+                right:3px;
+                border:$contents-item-height/2 solid transparent;
+                border-left-color: moccasin;
+                border-right-width: 1px;
+                z-index:$contents-item-body-z + 1;
+            }
+            .right-back{
+                position:absolute;
+                right:3px;
+                border: ($contents-item-height/2) solid transparent;
+                border-left-color: darkblue;
+                border-right:none;
+                z-index:$contents-item-body-z - 1;
+            }
+
+        }
+        .contents-item-bar {
             @extend .contents-item-parts;
             position:absolute;
             height : $contents-item-height;
-            width : 7px;
+            width : 23px;
             cursor : ew-resize;
             z-index : $contents-item-side-z;
-            border-left: $contents-item-border;
+
+            border: ($contents-item-height/2) solid transparent;
         }
+        .contents-item-right-bar {
+            @extend .contents-item-bar;
+            border-left-color: darkblue;
+            border-right:none;
+        }
+        .contents-item-left-bar {
+            @extend .contents-item-bar;
+            border-left:none;
+            border-right-color: darkblue;
+        }
+
         &.on {
           top : 1px;
           .contents-item-body {
-            background-color: moccasin;
-            z-index : $contents-item-body-z+2;
-          }
-          .contents-item-right-bar {
-            z-index : $contents-item-side-z+2;
-          }
-          .contents-item-left-bar {
-            z-index : $contents-item-side-z+2;
+            .right{
+                border-left-color: moccasin;
+            }
+            .left{
+                border-right-color: moccasin;
+            }
+            .center{
+                border-left-color: moccasin;
+                border-right-color:moccasin;
+                background-color: moccasin;
+            }
           }
         }
         &.off {
           top : ($scale-vertical-height - $contents-item-height)-1px;
           .contents-item-body {
-            background-color: skyblue;
+            .right{
+                border-left-color: skyblue;
+            }
+            .left{
+                border-right-color: skyblue;
+            }
+            .center{
+                border-left-color: skyblue;
+                border-right-color:skyblue;
+                background-color:  skyblue;
+            }
           }
         }
       }
